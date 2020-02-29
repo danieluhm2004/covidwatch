@@ -1,59 +1,28 @@
 import Router from 'koa-router';
 import { Context } from 'koa';
-import StatController from '../controllers/StatController';
-import StateController from '../controllers/StateController';
-import EState from '../enums/EState';
+import IsolationMiddleware from '../middlewares/IsolationMiddleware';
 
 const router = new Router();
 
+router.use(IsolationMiddleware);
 router.get('/', async (ctx: Context) => {
-  let state = EState.TOTAL;
-  if (ctx.params.state) {
-    state = StateController.getStateByText(ctx.params.state);
-  }
-
-  const stat = await StatController.getIsolation(state);
-  ctx.body = stat;
+  ctx.body = ctx.stat;
 });
 
 router.get('/total', async (ctx: Context) => {
-  let state = EState.TOTAL;
-  if (ctx.params.state) {
-    state = StateController.getStateByText(ctx.params.state);
-  }
-
-  const stat = await StatController.getIsolation(state);
-  ctx.body = stat.total;
+  ctx.body = ctx.stat.total;
 });
 
 router.get('/process', async (ctx: Context) => {
-  let state = EState.TOTAL;
-  if (ctx.params.state) {
-    state = StateController.getStateByText(ctx.params.state);
-  }
-
-  const stat = await StatController.getIsolation(state);
-  ctx.body = stat.process;
+  ctx.body = ctx.stat.process;
 });
 
 router.get('/release', async (ctx: Context) => {
-  let state = EState.TOTAL;
-  if (ctx.params.state) {
-    state = StateController.getStateByText(ctx.params.state);
-  }
-
-  const stat = await StatController.getIsolation(state);
-  ctx.body = stat.release;
+  ctx.body = ctx.stat.release;
 });
 
 router.get('/death', async (ctx: Context) => {
-  let state = EState.TOTAL;
-  if (ctx.params.state) {
-    state = StateController.getStateByText(ctx.params.state);
-  }
-
-  const stat = await StatController.getIsolation(state);
-  ctx.body = stat.death;
+  ctx.body = ctx.stat.death;
 });
 
 export default router;

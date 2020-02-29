@@ -1,49 +1,24 @@
 import Router from 'koa-router';
 import { Context } from 'koa';
-import StatController from '../controllers/StatController';
-import StateController from '../controllers/StateController';
-import EState from '../enums/EState';
+import InspectionMiddleware from '../middlewares/InspectionMiddleware';
 
 const router = new Router();
 
+router.use(InspectionMiddleware);
 router.get('/', async (ctx: Context) => {
-  let state = EState.TOTAL;
-  if (ctx.params.state) {
-    state = StateController.getStateByText(ctx.params.state);
-  }
-
-  const stat = await StatController.getInspection(state);
-  ctx.body = stat;
+  ctx.body = ctx.stat;
 });
 
 router.get('/total', async (ctx: Context) => {
-  let state = EState.TOTAL;
-  if (ctx.params.state) {
-    state = StateController.getStateByText(ctx.params.state);
-  }
-
-  const stat = await StatController.getInspection();
-  ctx.body = stat.total;
+  ctx.body = ctx.stat.total;
 });
 
 router.get('/process', async (ctx: Context) => {
-  let state = EState.TOTAL;
-  if (ctx.params.state) {
-    state = StateController.getStateByText(ctx.params.state);
-  }
-
-  const stat = await StatController.getInspection(state);
-  ctx.body = stat.process;
+  ctx.body = ctx.stat.process;
 });
 
 router.get('/negative', async (ctx: Context) => {
-  let state = EState.TOTAL;
-  if (ctx.params.state) {
-    state = StateController.getStateByText(ctx.params.state);
-  }
-
-  const stat = await StatController.getInspection(state);
-  ctx.body = stat.negative;
+  ctx.body = ctx.stat.negative;
 });
 
 export default router;

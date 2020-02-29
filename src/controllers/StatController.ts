@@ -15,7 +15,6 @@ class StatController {
   }
 
   public static async getIsolation(
-    // 격리 정보
     state: EState = EState.TOTAL,
   ): Promise<IStatIsolation> {
     const stat = await StatModel.findOne({ state })
@@ -27,7 +26,6 @@ class StatController {
   }
 
   public static async getInspection(
-    // 검사 정보
     state: EState = EState.TOTAL,
   ): Promise<IStatInspection> {
     const stat = await StatModel.findOne({ state })

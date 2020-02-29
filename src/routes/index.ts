@@ -8,8 +8,8 @@ import StatRouter from './StatRouter';
 const router = new Router();
 
 router.use('/:state', StatRouter.routes());
-router.use(['/:state/inspection', '/inspection'], InspectionRouter.routes());
-router.use(['/:state/isolation', '/isolation'], IsolationRouter.routes());
+router.use('/:state/inspection', InspectionRouter.routes());
+router.use('/:state/isolation', IsolationRouter.routes());
 router.use('/update', UpdateRouter.routes());
 
 router.get('/', (ctx) => {
