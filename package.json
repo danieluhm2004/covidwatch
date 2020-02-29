@@ -1,0 +1,39 @@
+{
+  "name": "covidwatch",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "repository": "https://github.com/danieluhm2004/covidwatch",
+  "author": "danieluhm2004 <danieluhm2004@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "start": "cross-env NODE_ENV=production node .",
+    "serve": "cross-env NODE_ENV=development tsc-watch -p . --onSuccess \"node .\"",
+    "build": "rm -rf dist && tsc"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.3",
+    "cross-env": "^7.0.0",
+    "dotenv": "^8.2.0",
+    "got": "^10.6.0",
+    "koa": "^2.11.0",
+    "koa-router": "^8.0.8",
+    "lodash": "^4.17.15",
+    "moment": "^2.24.0",
+    "mongoose": "^5.9.2"
+  },
+  "devDependencies": {
+    "@types/cheerio": "^0.22.16",
+    "@types/eslint": "^6.1.8",
+    "@types/koa": "^2.11.2",
+    "@types/koa-router": "^7.4.0",
+    "@types/lodash": "^4.14.149",
+    "@types/mongoose": "^5.7.3",
+    "@typescript-eslint/eslint-plugin": "^2.21.0",
+    "@typescript-eslint/parser": "^2.21.0",
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-plugin-import": "^2.20.1",
+    "tsc-watch": "^4.1.0",
+    "typescript": "^3.8.3"
+  }
+}
