@@ -3,14 +3,12 @@ import Moment from 'moment';
 import Cheerio from 'cheerio';
 import Got from 'got';
 import StateController from './StateController';
-import IStatIsolation from '../interfaces/IStatIsolation';
-import IStatInspection from '../interfaces/IStatInspection';
 
 class CrawlerController {
   private static url = 'http://ncov.mohw.go.kr/bdBoardList_Real.do?brdGubun=13';
   /* brdGubun: 11 -> 발생동향 | 12 -> 확진환자 이동경로 | 13 -> 시도별 발생동향 */
 
-  public static async requestCrawling() {
+  public static async requestCrawling(): Promise<boolean> {
     const isOutdated = await CrawlerController.isOutdated();
     if (!isOutdated) return false;
 
@@ -19,23 +17,24 @@ class CrawlerController {
 
   private static async isOutdated(): Promise<boolean> {
     const latestOne = await StatModel.findOne()
-      .sort({ timestamp: -1 })
-      .select('timestamp');
+      .sort({ updateAt: -1 })
+      .select('updateAt');
 
     if (!latestOne) return true;
-    const timestamp = Moment(latestOne.timestamp);
-    timestamp.add(3, 'hours');
-    if (!timestamp.isBefore()) return false;
+    const updateAt = Moment(latestOne.updateAt);
+    updateAt.add(3, 'minutes'); // 3분 내로 업데이트시 거절.
+    if (!updateAt.isBefore()) return false;
     return true;
   }
 
-  private static async onRequest() {
+  private static async onRequest(): Promise<boolean> {
     try {
+      const beforeRows = await StatModel.countDocuments();
       const res = await Got(this.url);
       const $ = Cheerio.load(res.body);
 
       const displayTime = $('.timetable > p > span').text();
-      const timestamp = CrawlerController.getTimeByDisplay(displayTime);
+      const updateAt: Date = CrawlerController.getTimeByDisplay(displayTime);
       const rows = $('tbody > tr').toArray();
 
       for (const row of rows) {
@@ -44,47 +43,43 @@ class CrawlerController {
           const displayState = _$.find('th').text();
           const state = StateController.getStateByDisplay(displayState);
           const fields = _$.find('td.number').toArray();
-          const increase = parseInt($(fields[0]).text());
-          const isolationTotal = parseInt($(fields[1]).text());
-          const isolationProcess = parseInt($(fields[2]).text());
-          const isolationRelease = parseInt($(fields[3]).text());
-          const isolationDeath = parseInt($(fields[4]).text());
-          const inspectionTotal = parseInt($(fields[5]).text());
-          const inspectionProcess = parseInt($(fields[6]).text());
-          const inspectionNegative = parseInt($(fields[7]).text());
-          const total = parseInt($(fields[8]).text());
+          const increase = CrawlerController.parseInt($, fields[0]);
+          const confirmator = CrawlerController.parseInt($, fields[1]);
+          const death = CrawlerController.parseInt($, fields[2]);
+          const incidence = CrawlerController.parseInt($, fields[3]);
+          const inspection = CrawlerController.parseInt($, fields[4]);
 
-          const isolation: IStatIsolation = {
-            total: isolationTotal,
-            process: isolationProcess,
-            release: isolationRelease,
-            death: isolationDeath,
-          };
-
-          const inspection: IStatInspection = {
-            total: inspectionTotal,
-            process: inspectionProcess,
-            negative: inspectionNegative,
-          };
-
-          StatModel.create({
-            timestamp,
-            state,
-            isolation,
-            inspection,
-            increase,
-            total,
-          });
+          await StatModel.updateOne(
+            {
+              updateAt,
+              state,
+            },
+            {
+              updateAt,
+              state,
+              increase,
+              confirmator,
+              death,
+              incidence,
+              inspection,
+            },
+            {
+              upsert: true,
+            },
+          );
         } catch (err) {
           console.warn(err.message);
         }
       }
+
+      const afterRows = await StatModel.countDocuments();
+      return afterRows - beforeRows !== 0;
     } catch (err) {
       return false;
     }
   }
 
-  private static getTimeByDisplay(datetime: string): Moment.Moment {
+  private static getTimeByDisplay(datetime: string): Date {
     const regex = new RegExp(
       /^([0-9]{1,4})년 ([0-9]{1,2})월 ([0-9]{1,2})일\((.{1})\) ([0-9]{1,2})시$/,
     );
@@ -100,7 +95,15 @@ class CrawlerController {
     const moment = Moment(`${year}-${month}-${day}T${time}:00:00.000Z`);
     if (!moment.isValid()) throw Error('Invalid Time');
 
-    return moment;
+    return moment.toDate();
+  }
+
+  private static parseInt($: CheerioStatic, field: any): number {
+    return parseInt(
+      $(field)
+        .text()
+        .replace(/,/, ''),
+    );
   }
 }
 
