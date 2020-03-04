@@ -3,26 +3,14 @@ import IStat from '../interfaces/IStat';
 import _ from 'lodash';
 import ECity from '../enums/EState';
 
-const StatIsolationSchema = new Schema({
-  total: { type: Number, default: 0, required: true },
-  process: { type: Number, default: 0, required: true },
-  release: { type: Number, default: 0, required: true },
-  death: { type: Number, default: 0, required: true },
-});
-
-const StatInspectionSchema = new Schema({
-  total: { type: Number, default: 0, required: true },
-  process: { type: Number, default: 0, required: true },
-  negative: { type: Number, default: 0, required: true },
-});
-
 const StatSchema = new Schema({
-  timestamp: { type: Date, default: Date.now, required: true },
-  state: { type: String, enum: _.filter(ECity, _.isNumber), required: true },
-  isolation: { type: StatIsolationSchema, required: true },
-  inspection: { type: StatInspectionSchema, required: true },
+  state: { type: Number, enum: _.filter(ECity, _.isNumber), required: true },
   increase: { type: Number, default: 0, required: true },
-  total: { type: Number, default: 0, required: true },
+  confirmator: { type: Number, default: 0, required: true },
+  death: { type: Number, default: 0, required: true },
+  incidence: { type: Number, default: 0, required: true },
+  inspection: { type: Number, default: 0, required: true },
+  updateAt: { type: Date, default: Date.now, required: true },
 });
 
 export default Mongoose.model<IStat>('Stats', StatSchema);
