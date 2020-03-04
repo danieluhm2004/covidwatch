@@ -1,39 +1,67 @@
 import EState from '../enums/EState';
 import StatModel from '../models/StatModel';
-import IStatIsolation from '../interfaces/IStatIsolation';
-import IStatInspection from '../interfaces/IStatInspection';
 import IStat from '../interfaces/IStat';
 
 class StatController {
-  public static async getInfo(state: EState = EState.TOTAL): Promise<IStat> {
+  public static async getEverything(
+    state: EState = EState.TOTAL,
+    optional: string = '-_id -__v -state',
+  ): Promise<IStat | null> {
     const stat = await StatModel.findOne({ state })
-      .sort({ timestamp: -1 })
-      .select('total increase');
+      .sort({ updateAt: -1 })
+      .select(optional);
 
-    if (!stat) throw Error('Cannot find latest of stat.');
     return stat;
   }
 
-  public static async getIsolation(
+  public static async getIncrease(
     state: EState = EState.TOTAL,
-  ): Promise<IStatIsolation> {
-    const stat = await StatModel.findOne({ state })
-      .sort({ timestamp: -1 })
-      .select('isolation');
+  ): Promise<number> {
+    const query = await StatController.getEverything(state, 'increase');
+    if (!query || !query.increase) return NaN;
 
-    if (!stat) throw Error('Cannot find latest of stat.');
-    return stat.isolation;
+    return query.increase;
+  }
+
+  public static async getConfirmator(
+    state: EState = EState.TOTAL,
+  ): Promise<number> {
+    const query = await StatController.getEverything(state, 'confirmator');
+    if (!query || !query.confirmator) return NaN;
+
+    return query.confirmator;
+  }
+
+  public static async getDeath(state: EState = EState.TOTAL): Promise<number> {
+    const query = await StatController.getEverything(state, 'death');
+    if (!query || !query.death) return NaN;
+
+    return query.death;
+  }
+
+  public static async getIncidence(
+    state: EState = EState.TOTAL,
+  ): Promise<number> {
+    const query = await StatController.getEverything(state, 'incidence');
+    if (!query || !query.incidence) return NaN;
+
+    return query.incidence;
   }
 
   public static async getInspection(
     state: EState = EState.TOTAL,
-  ): Promise<IStatInspection> {
-    const stat = await StatModel.findOne({ state })
-      .sort({ timestamp: -1 })
-      .select('inspection');
+  ): Promise<number> {
+    const query = await StatController.getEverything(state, 'inspection');
+    if (!query || !query.inspection) return NaN;
 
-    if (!stat) throw Error('Cannot find latest of stat.');
-    return stat.inspection;
+    return query.inspection;
+  }
+
+  public static async whenUpdate(state: EState = EState.TOTAL): Promise<Date> {
+    const query = await StatController.getEverything(state, 'updateAt');
+    if (!query || !query.updateAt) return new Date(0);
+
+    return query.updateAt;
   }
 }
 
