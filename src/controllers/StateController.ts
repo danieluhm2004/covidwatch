@@ -1,7 +1,7 @@
 import EState from '../enums/EState';
 
 class StateController {
-  static getStateByText(text: string): EState {
+  static getStateByText(text: string = 'total'): EState {
     switch (text.toLowerCase()) {
       case 'total':
         return EState.TOTAL;

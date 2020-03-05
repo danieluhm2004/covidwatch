@@ -6,11 +6,12 @@ class StatController {
   public static async getEverything(
     state: EState = EState.TOTAL,
     optional: string = '-_id -__v -state',
-  ): Promise<IStat | null> {
+  ): Promise<IStat> {
     const stat = await StatModel.findOne({ state })
       .sort({ updateAt: -1 })
       .select(optional);
 
+    if (!stat) throw Error('Cannot find state stat');
     return stat;
   }
 

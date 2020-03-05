@@ -1,8 +1,9 @@
-export default {
-  Query: {
-    getStat: () => ({
-      total: 0,
-      increase: 0,
-    }),
-  },
+import Query from './Query';
+import Mutation from './Mutation';
+
+const resolvers = {
+  Query,
+  Mutation,
 };
+
+export default resolvers;
